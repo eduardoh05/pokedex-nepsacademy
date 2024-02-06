@@ -12,11 +12,11 @@
 
           <v-row>
             <v-col 
-            cols="3" 
+            cols="2" 
             v-for="pokemon in filtered_pokemons" 
             :key="pokemon.name">
 
-            <v-card>
+            <v-card @click="show_pokemon(get_id(pokemon))">
               <v-container>
                 <v-row class="mx-0 d-flex justify-center">
                 <img :src="`https:/raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${get_id(pokemon)}.png`" :alt="pokemon.name"
@@ -33,6 +33,34 @@
         </v-container>
 
     </v-container>
+
+    <v-dialog v-model="show_dialog"  width="800">
+      <v-card v-if="selected_pokemon">
+
+        <v-container>
+          <v-row class="d-flex align-center">
+            <v-col cols="4">
+              <img 
+              :src="`https:/raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selected_pokemon.id}.png`"
+              :alt="selected_pokemon.name"
+              width="80%">
+            </v-col>
+
+            <v-col cols=8>
+              <h1> {{ get_name(selected_pokemon) }}</h1>
+              <v-chip label>Altura {{ selected_pokemon.height * 2.54 }} cm</v-chip>  
+
+              <v-chip label>Peso {{ (selected_pokemon.weight * 0.453592).toFixed(0) }} kgs</v-chip>
+            </v-col>
+
+            <v-divider></v-divider>
+            
+          </v-row>
+          {{selected_pokemon}}
+        </v-container>
+      </v-card>
+   </v-dialog>
+
   </v-app>
 </template>
 
@@ -48,7 +76,9 @@ export default {
 
   data: () => ({
     pokemons: [],
-    search: ""
+    search: "",
+    show_dialog: false,
+    selected_pokemon: null,
   }),
 
   mounted(){
@@ -63,6 +93,12 @@ export default {
     },
     get_name(pokemon){
       return pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)
+    },
+    show_pokemon(id) {
+      axios.get(`https://pokeapi.co/api/v2/pokemon/${id}/`).then((res) => {
+      this.selected_pokemon = res.data
+      this.show_dialog = !this.show_dialog
+    })
     }
   },
 
